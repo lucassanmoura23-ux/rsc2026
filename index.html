@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verificador RSC-PCCTAE — CRSC-PCCTAE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy-900:#131F38; --navy-800:#1B2C4D; --navy-700:#243A63;
+  --paper:#FAF8F3; --paper-dim:#F1EEE5; --paper-dim2:#E9E4D6;
+  --gold:#9C7A3C; --gold-soft:#C7A768;
+  --ink:#1E1A14; --ink-soft:#5C5648;
+  --line:#DAD3C0;
+  --green:#2E6B4E; --green-bg:#E7EFE7;
+  --red:#9E3B2C; --red-bg:#F3E6E1;
+  --amber:#96661F; --amber-bg:#F4EBDA;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:var(--paper-dim);color:var(--ink);font-family:'Inter',sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;}
+h1,h2,h3{font-family:'Fraunces',serif;margin:0;}
+input,select,textarea,button{font-family:'Inter',sans-serif;}
+
+/* ---------- TOP BAR ---------- */
+.topbar{
+  background:var(--navy-900); color:var(--paper);
+  border-bottom:4px solid var(--gold);
+  position:sticky; top:0; z-index:50;
+}
+.topbar-inner{
+  max-width:1280px; margin:0 auto; padding:14px 24px;
+  display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap;
+}
+.brand{display:flex; flex-direction:column; gap:2px;}
+.brand .eyebrow{font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--gold-soft);}
+.brand h1{font-size:19px; font-weight:600;}
+.status-badge{
+  display:flex; align-items:center; gap:14px;
+  background:var(--navy-800); border:1px solid #33436A; padding:8px 16px;
+  font-family:'IBM Plex Mono',monospace; font-size:12.5px;
+}
+.status-badge .lvl{font-size:20px; font-weight:700; color:var(--gold-soft); font-family:'Fraunces',serif;}
+.status-badge .stat{display:flex; flex-direction:column; align-items:center; padding:0 8px; border-left:1px solid #33436A;}
+.status-badge .stat span.n{font-weight:700; color:var(--paper); font-size:14px;}
+.status-badge .stat span.l{color:#9AA4BE; font-size:9.5px; text-transform:uppercase; letter-spacing:.06em;}
+.pill{padding:4px 12px; border-radius:2px; font-weight:700; font-size:11.5px; letter-spacing:.05em;}
+.pill.ok{background:var(--green-bg); color:var(--green);}
+.pill.no{background:var(--red-bg); color:var(--red);}
+.pill.warn{background:var(--amber-bg); color:var(--amber);}
+
+/* ---------- LAYOUT ---------- */
+.shell{max-width:1280px; margin:0 auto; padding:24px; display:grid; grid-template-columns:220px 1fr; gap:24px;}
+@media (max-width:900px){ .shell{grid-template-columns:1fr;} }
+
+.tabs{display:flex; flex-direction:column; gap:4px; position:sticky; top:88px; align-self:start;}
+@media (max-width:900px){ .tabs{position:static; flex-direction:row; overflow-x:auto; padding-bottom:4px;} }
+.tab-btn{
+  text-align:left; background:var(--paper); border:1px solid var(--line); border-left:3px solid transparent;
+  padding:12px 14px; font-size:13.5px; font-weight:600; color:var(--ink-soft); cursor:pointer; white-space:nowrap;
+}
+.tab-btn .num{font-family:'IBM Plex Mono',monospace; color:var(--gold); margin-right:6px; font-weight:600;}
+.tab-btn:hover{background:var(--paper-dim);}
+.tab-btn.active{background:var(--paper); border-left-color:var(--gold); color:var(--navy-900);}
+
+.panel{background:var(--paper); border:1px solid var(--line); padding:28px; min-height:520px;}
+.panel-head{border-bottom:1px solid var(--line); padding-bottom:14px; margin-bottom:22px;}
+.panel-head h2{font-size:21px; font-weight:600;}
+.panel-head p{color:var(--ink-soft); font-size:13.5px; margin:6px 0 0; max-width:640px;}
+
+/* forms */
+.form-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin-bottom:20px;}
+.field label{display:block; font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); margin-bottom:6px;}
+.field input[type=text], .field input[type=date], .field input[type=number], .field select, .field textarea{
+  width:100%; border:1px solid var(--line); background:var(--paper); padding:9px 11px; font-size:14px; color:var(--ink); border-radius:2px;
+}
+.field textarea{resize:vertical; min-height:56px;}
+.field .hint{font-size:11.5px; color:var(--ink-soft); margin-top:4px;}
+.checkline{display:flex; align-items:center; gap:8px; font-size:14px; padding:10px 0;}
+.checkline input{width:16px; height:16px;}
+
+.radio-row{display:flex; gap:16px;}
+.radio-row label{display:flex; align-items:center; gap:6px; font-size:13.5px; font-weight:500;}
+
+/* activity entry */
+.entry-box{background:var(--paper-dim); border:1px solid var(--line); padding:20px; margin-bottom:24px;}
+.entry-box h3{font-size:14px; margin-bottom:14px; font-family:'Inter',sans-serif; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--gold);}
+.btn{
+  background:var(--navy-900); color:var(--paper); border:none; padding:10px 18px; font-weight:600; font-size:13.5px;
+  cursor:pointer; border-radius:2px; display:inline-flex; align-items:center; gap:8px;
+}
+.btn:hover{background:var(--navy-700);}
+.btn.secondary{background:transparent; border:1px solid var(--navy-900); color:var(--navy-900);}
+.btn.secondary:hover{background:var(--navy-900); color:var(--paper);}
+.btn.danger{background:transparent; border:1px solid var(--red); color:var(--red); padding:6px 10px; font-size:12px;}
+.btn.danger:hover{background:var(--red); color:var(--paper);}
+
+table{width:100%; border-collapse:collapse; font-size:13.3px;}
+th,td{text-align:left; padding:9px 10px; border-bottom:1px solid var(--line); vertical-align:top;}
+th{font-family:'IBM Plex Mono',monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); border-bottom:2px solid var(--navy-800);}
+td.num{font-family:'IBM Plex Mono',monospace; font-weight:600; color:var(--navy-800); white-space:nowrap;}
+.tagmini{font-family:'IBM Plex Mono',monospace; font-size:10.5px; background:var(--paper-dim2); border:1px solid var(--line); padding:2px 6px; border-radius:2px; color:var(--ink-soft);}
+.empty-row td{color:var(--ink-soft); text-align:center; padding:26px; font-style:italic;}
+
+.warning-box{border-left:3px solid var(--amber); background:var(--amber-bg); padding:12px 16px; font-size:13px; margin:14px 0; color:#5a4419;}
+.warning-box strong{color:var(--amber);}
+
+/* level table */
+.level-table td, .level-table th{text-align:center;}
+.level-table td:first-child, .level-table th:first-child{text-align:left;}
+.check-yes{color:var(--green); font-weight:700;}
+.check-no{color:var(--red); font-weight:700;}
+.check-na{color:var(--ink-soft);}
+.row-current{background:var(--paper-dim2);}
+
+.summary-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1px; background:var(--line); border:1px solid var(--line); margin-bottom:24px;}
+.summary-cell{background:var(--paper); padding:16px 18px;}
+.summary-cell .label{font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--gold); font-weight:700; margin-bottom:6px;}
+.summary-cell .value{font-family:'Fraunces',serif; font-size:24px; font-weight:600; color:var(--navy-800);}
+
+/* checklist art 14 */
+.art14-item{border:1px solid var(--line); padding:14px 16px; margin-bottom:10px; display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;}
+.art14-item .idx{font-family:'IBM Plex Mono',monospace; color:var(--gold); font-weight:700; font-size:13px; min-width:24px;}
+.art14-item .txt{flex:1; min-width:220px; font-size:13.8px;}
+.art14-item select{border:1px solid var(--line); padding:7px 10px; font-size:13px; border-radius:2px;}
+
+/* parecer */
+.parecer-box{border:1px solid var(--line); padding:24px; background:var(--paper-dim); font-size:14px;}
+.parecer-box h3{font-size:16px; margin-bottom:10px;}
+.parecer-verdict{
+  display:inline-block; padding:10px 20px; font-family:'IBM Plex Mono',monospace; font-weight:700;
+  font-size:15px; letter-spacing:.05em; border:3px solid; transform:rotate(-3deg); margin-bottom:16px; border-radius:3px;
+}
+.parecer-verdict.ok{color:var(--green); border-color:var(--green);}
+.parecer-verdict.no{color:var(--red); border-color:var(--red);}
+.parecer-text{white-space:pre-wrap; line-height:1.7; font-size:13.8px; background:var(--paper); border:1px solid var(--line); padding:18px; margin-top:14px;}
+
+@media print{
+  .topbar, .tabs, .btn, .entry-box, select, .no-print{display:none !important;}
+  .panel{border:none; padding:0;}
+  .shell{grid-template-columns:1fr; padding:0;}
+  body{background:#fff;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="eyebrow">CRSC-PCCTAE · Decreto nº 13.048/2026</span>
+      <h1>Verificador de Processos RSC-PCCTAE</h1>
+    </div>
+    <div class="status-badge">
+      <span>Apuração:</span>
+      <span class="lvl" id="badgeLevel">—</span>
+      <div class="stat"><span class="n" id="badgePoints">0</span><span class="l">pontos</span></div>
+      <div class="stat"><span class="n" id="badgeCriteria">0</span><span class="l">critérios</span></div>
+      <div class="stat"><span class="l" style="margin-bottom:2px;">situação</span><span class="pill warn" id="badgeStatus">em análise</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="shell">
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="dados"><span class="num">01</span>Dados do processo</button>
+    <button class="tab-btn" data-tab="documentos"><span class="num">02</span>Documentos válidos</button>
+    <button class="tab-btn" data-tab="atividades"><span class="num">03</span>Lançamento de atividades</button>
+    <button class="tab-btn" data-tab="niveis"><span class="num">04</span>Apuração de nível</button>
+    <button class="tab-btn" data-tab="art14"><span class="num">05</span>Checklist arts. 14 e 15</button>
+    <button class="tab-btn" data-tab="legal"><span class="num">06</span>Base legal (arts. 1º–22)</button>
+    <button class="tab-btn" data-tab="parecer"><span class="num">07</span>Parecer final</button>
+  </div>
+
+  <div class="panel">
+
+    <!-- TAB 1 -->
+    <div class="tab-content" id="tab-dados">
+      <div class="panel-head">
+        <h2>Dados do processo</h2>
+        <p>Identificação do servidor e verificações preliminares que podem, por si só, motivar o indeferimento (arts. 11 e 12).</p>
+      </div>
+
+      <div class="form-grid">
+        <div class="field"><label>Nome do servidor</label><input type="text" id="fNome" placeholder="Nome completo"></div>
+        <div class="field"><label>Cargo atual (PCCTAE)</label><input type="text" id="fCargo" placeholder="Ex.: Administrador"></div>
+        <div class="field"><label>Nível pretendido</label>
+          <select id="fPretendido">
+            <option value="">— não informado —</option>
+            <option>RSC-I</option><option>RSC-II</option><option>RSC-III</option>
+            <option>RSC-IV</option><option>RSC-V</option><option>RSC-VI</option>
+          </select>
+        </div>
+        <div class="field"><label>Data do protocolo</label><input type="date" id="fProtocolo"></div>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>Escolaridade comprovada</label>
+          <select id="fEscolaridade">
+            <option value="0">Não concluiu o ensino fundamental</option>
+            <option value="1">Ensino fundamental completo</option>
+            <option value="2">Ensino médio ou técnico completo</option>
+            <option value="3">Graduação</option>
+            <option value="4">Especialização (pós-graduação lato sensu)</option>
+            <option value="5">Mestrado</option>
+          </select>
+          <div class="hint">Define o teto de nível/percentual associado à credencial (art. 5º, § 1º).</div>
+        </div>
+        <div class="field">
+          <label>Já teve RSC concedido antes?</label>
+          <div class="radio-row" style="padding-top:9px;">
+            <label><input type="radio" name="fTeveRsc" value="nao" checked> Não</label>
+            <label><input type="radio" name="fTeveRsc" value="sim"> Sim</label>
+          </div>
+        </div>
+        <div class="field" id="fDataUltimaWrap" style="display:none;">
+          <label>Data da última concessão</label>
+          <input type="date" id="fDataUltima">
+          <div class="hint" id="interSticioHint"></div>
+        </div>
+        <div class="field">
+          <label>Está em estágio probatório?</label>
+          <div class="radio-row" style="padding-top:9px;">
+            <label><input type="radio" name="fEstagio" value="nao" checked> Não</label>
+            <label><input type="radio" name="fEstagio" value="sim"> Sim</label>
+          </div>
+        </div>
+      </div>
+
+      <div id="preAlertBox"></div>
+
+      <h3 style="font-size:14px; margin:26px 0 10px; font-family:'Inter',sans-serif; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--gold);">Documentação apresentada (art. 13)</h3>
+      <div class="checkline"><input type="checkbox" id="d1"><label for="d1">Formulário padrão preenchido, com dados funcionais, nível pleiteado e saldo de pontos anterior</label></div>
+      <div class="checkline"><input type="checkbox" id="d2"><label for="d2">Memorial descrevendo a trajetória profissional vinculada aos requisitos do art. 3º</label></div>
+      <div class="checkline"><input type="checkbox" id="d3"><label for="d3">Documentação comprobatória de cada atividade (Anexos I a VI)</label></div>
+      <div class="checkline"><input type="checkbox" id="d4"><label for="d4">Declaração de conformidade de que os pontos não foram usados em concessão anterior</label></div>
+    </div>
+
+    <!-- TAB DOCUMENTOS -->
+    <div class="tab-content" id="tab-documentos" style="display:none;">
+      <div class="panel-head">
+        <h2>Documentos válidos para comprovação</h2>
+        <p>O art. 4º, parágrafo único, estabelece taxativamente os tipos de documento aceitos para comprovar os critérios dos Anexos I a VI. Qualquer comprovante fora destas categorias deve ser questionado antes da instrução do processo.</p>
+      </div>
+
+      <table>
+        <thead><tr><th style="width:60px;">Inciso</th><th>Documento aceito (art. 4º, parágrafo único)</th><th>Uso típico</th></tr></thead>
+        <tbody>
+          <tr><td class="num">I</td><td>Portarias, resoluções ou atos de designação ou nomeação editados pela Instituição Federal de Ensino</td><td>Comissões, GTs, coordenações, funções, designações em geral (Anexos I, II, IV, V)</td></tr>
+          <tr><td class="num">II</td><td>Diplomas, certificados ou declarações de conclusão</td><td>Credencial de escolaridade e cursos (Anexo VI, item 4)</td></tr>
+          <tr><td class="num">III-a</td><td>Comprovantes de produção técnica ou científica</td><td>Materiais técnicos, protótipos (Anexo VI)</td></tr>
+          <tr><td class="num">III-b</td><td>Comprovantes de certificação técnica ou profissional</td><td>Certificações específicas de área</td></tr>
+          <tr><td class="num">III-c</td><td>Comprovantes de publicações de obras, artigos ou produções intelectuais</td><td>Livros, capítulos, artigos (Anexo VI, itens 9-10)</td></tr>
+          <tr><td class="num">III-d</td><td>Comprovantes de premiação ou publicação institucional do reconhecimento</td><td>Prêmios (Anexo III)</td></tr>
+          <tr><td class="num">IV</td><td>Atas ou relatórios que atestem a participação em comissão, grupos de trabalho, câmaras ou comitês</td><td>Participações sem portaria formal individualizada (Anexo I)</td></tr>
+          <tr><td class="num">V</td><td>Relatórios técnicos, protótipos, manuais, projetos ou termos de referência</td><td>Produtos técnicos (Anexos II, IV, VI)</td></tr>
+          <tr><td class="num">VI</td><td>Declarações ou certificados de instrutoria, mentoria, orientação ou supervisão</td><td>Orientação, tutoria, instrutoria (Anexos II, VI)</td></tr>
+          <tr><td class="num">VII</td><td>Outros documentos institucionais, nos termos estabelecidos em ato do Ministro de Estado da Educação</td><td>Categoria residual — <strong>verificar se já existe o ato do MEC regulamentando</strong> antes de aceitar</td></tr>
+        </tbody>
+      </table>
+
+      <div class="warning-box" style="margin-top:18px;">
+        <strong>Atenção ao inciso VII:</strong> é uma categoria aberta, condicionada a ato específico do Ministro da Educação (ainda não editado até a data deste decreto). Documentos que não se encaixem nos incisos I a VI só podem ser aceitos com base no VII se esse ato já existir — confirme antes de instruir o processo com base nele.
+      </div>
+
+      <div class="warning-box">
+        <strong>Regra complementar (art. 5º, § 3º):</strong> cada atividade só pode ser aproveitada uma vez. Se o mesmo fato dá margem a mais de um enquadramento possível, prevalece o enquadramento definido pela Comissão mediante avaliação fundamentada — vedada a dupla contagem, sinalizada automaticamente na aba "Lançamento de atividades".
+      </div>
+    </div>
+
+    <!-- TAB 3 -->
+    <div class="tab-content" id="tab-atividades" style="display:none;">
+      <div class="panel-head">
+        <h2>Lançamento de atividades</h2>
+        <p>Cada linha representa um documento comprobatório enquadrado em um critério específico dos Anexos I a VI. Atividades do mesmo critério podem ser lançadas quantas vezes ocorrerem — o sistema soma os pontos e conta os critérios distintos automaticamente.</p>
+      </div>
+
+      <div class="entry-box">
+        <h3>Nova atividade</h3>
+        <div class="form-grid">
+          <div class="field"><label>Anexo / Requisito</label>
+            <select id="eAnexo"></select>
+          </div>
+          <div class="field" style="grid-column:span 2;"><label>Critério específico</label>
+            <select id="eItem"></select>
+          </div>
+          <div class="field" id="eTipoWrap" style="display:none;"><label>Exercício</label>
+            <select id="eTipo"><option value="titular">Titular</option><option value="substituto">Substituto</option></select>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="field"><label id="eQtdLabel">Quantidade</label><input type="number" id="eQtd" min="0" step="0.1" value="1"></div>
+          <div class="field"><label>Documento / portaria nº</label><input type="text" id="eDoc" placeholder="Ex.: Portaria 045/2023"></div>
+          <div class="field"><label>Tipo de documento (art. 4º)</label>
+            <select id="eTipoDoc">
+              <option value="I">I — Portaria/resolução/ato de designação</option>
+              <option value="II">II — Diploma/certificado/declaração de conclusão</option>
+              <option value="III-a">III-a — Comprovante de produção técnica/científica</option>
+              <option value="III-b">III-b — Comprovante de certificação técnica/profissional</option>
+              <option value="III-c">III-c — Comprovante de publicação/produção intelectual</option>
+              <option value="III-d">III-d — Comprovante de premiação/publicação institucional</option>
+              <option value="IV">IV — Ata/relatório de participação em comissão ou GT</option>
+              <option value="V">V — Relatório técnico/protótipo/manual/termo de referência</option>
+              <option value="VI">VI — Declaração/certificado de instrutoria/mentoria/orientação</option>
+              <option value="VII">VII — Outro documento institucional (ato do MEC) — verificar</option>
+            </select>
+          </div>
+          <div class="field" style="grid-column:span 2;"><label>Observação (opcional)</label><input type="text" id="eObs" placeholder="Detalhe relevante para a análise"></div>
+        </div>
+        <div id="ePontosPreview" style="font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--ink-soft); margin-bottom:12px;"></div>
+        <button class="btn" id="btnAddAtividade">+ Adicionar atividade</button>
+      </div>
+
+      <div id="duplicidadeAlert"></div>
+      <div id="pendentesAlert"></div>
+
+      <table>
+        <thead><tr>
+          <th>Requisito</th><th>Critério</th><th>Documento</th><th>Tipo (art. 4º)</th><th>Qtd.</th><th>Pontos</th><th>Decisão</th><th class="no-print"></th>
+        </tr></thead>
+        <tbody id="atividadesTbody"></tbody>
+      </table>
+    </div>
+
+    <!-- TAB 3 -->
+    <div class="tab-content" id="tab-niveis" style="display:none;">
+      <div class="panel-head">
+        <h2>Apuração de nível</h2>
+        <p>Verificação automática dos três requisitos cumulativos de cada nível: pontuação mínima, quantidade de critérios específicos distintos e, a partir do RSC-IV, diversidade obrigatória entre incisos (art. 5º).</p>
+      </div>
+
+      <div class="summary-grid">
+        <div class="summary-cell"><div class="label">Pontuação total</div><div class="value" id="sPontos">0</div></div>
+        <div class="summary-cell"><div class="label">Critérios distintos</div><div class="value" id="sCriterios">0</div></div>
+        <div class="summary-cell"><div class="label">Nível por pontuação</div><div class="value" id="sNivelPontos">—</div></div>
+        <div class="summary-cell"><div class="label">Nível ajustado à credencial</div><div class="value" id="sNivelFinal">—</div></div>
+      </div>
+
+      <table class="level-table">
+        <thead><tr><th>Nível</th><th>Pontos mín.</th><th>Critérios mín.</th><th>Diversidade exigida</th><th>Situação</th></tr></thead>
+        <tbody id="nivelTbody"></tbody>
+      </table>
+
+      <div class="warning-box" style="margin-top:20px;">
+        <strong>Leitura sobre credencial:</strong> o decreto vincula, no art. 5º, § 1º, cada nível a uma credencial de escolaridade mínima para fins de percentual do Incentivo à Qualificação. Este verificador aplica o entendimento de que o nível final concedível é limitado pelo menor entre o nível alcançado por pontuação e o nível compatível com a escolaridade comprovada — não há dispositivo que resolva expressamente eventual conflito entre os dois; em caso de divergência, submeta à análise da CRSC-PCCTAE.
+      </div>
+    </div>
+
+    <!-- TAB 4 -->
+    <div class="tab-content" id="tab-art14" style="display:none;">
+      <div class="panel-head">
+        <h2>Checklist de indeferimento (art. 14)</h2>
+        <p>Cada item traz uma pergunta prática para você responder, com o texto literal da lei logo abaixo como referência. Marque a situação de cada um — a lista integra automaticamente o parecer final.</p>
+      </div>
+      <div class="warning-box" style="border-color:var(--navy-800); background:var(--paper-dim2); color:var(--ink); font-style:italic;">
+        <strong style="font-style:normal;">Art. 14, caput:</strong> "<span id="art14Caput"></span>"
+      </div>
+      <div id="art14List"></div>
+
+      <h3 style="font-size:14px; margin:28px 0 10px; font-family:'Inter',sans-serif; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--gold);">Fundamentação do mérito — art. 15</h3>
+      <div class="warning-box" style="border-color:var(--navy-800); background:var(--paper-dim2); color:var(--ink); font-style:italic;">
+        <strong style="font-style:normal;">Art. 15 (texto integral):</strong> "A CRSC-PCCTAE, ao conceder o RSC-PCCTAE, deverá, em sua decisão, atestar de forma fundamentada que o requerente possui saberes e competências diferenciados, que qualificam a execução ordinária das atribuições do cargo e contribuem de maneira singular para o aprimoramento de sua atuação ou da consecução dos resultados institucionais."
+      </div>
+      <div class="warning-box">
+        Esta é uma exigência <strong>separada</strong> da pontuação: mesmo com os requisitos numéricos atendidos, a concessão exige este registro fundamentado.
+      </div>
+
+      <h4 style="font-size:13px; margin:22px 0 8px; font-family:'Inter',sans-serif; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--navy-800);">Prompt objetivo — correspondência + mérito proporcional (com tabela de pontos e desconto justificado)</h4>
+      <p style="font-size:13px; color:var(--ink-soft); margin-bottom:10px;">Copie o texto abaixo e cole numa conversa com uma IA (ex.: Claude, DeepSeek etc.). Anexe o memorial e os documentos. A tabela de pontos dos 55 critérios já vem embutida, então a IA sabe quanto vale cada item para calcular descontos. Atividades agrupadas recebem benefício da dúvida, exceto quando o próprio texto sinaliza claramente que a evidência não cobre todo o grupo (recorte temporal, citação nominal de só parte dos casos).</p>
+      <textarea id="promptArt15" readonly rows="10" style="width:100%; font-family:'IBM Plex Mono',monospace; font-size:12px; border:1px solid var(--line); background:var(--paper-dim); padding:14px; border-radius:2px; color:var(--ink); resize:vertical;"></textarea>
+      <div class="no-print" style="margin-top:10px;">
+        <button class="btn secondary" id="btnCopiarPromptArt15">📋 Copiar prompt</button>
+        <span id="copiarPromptFeedback" style="font-size:12px; color:var(--green); margin-left:10px; display:none;">Copiado!</span>
+      </div>
+
+      <div class="field" style="margin-top:22px;">
+        <label>Em que consistem os saberes/competências diferenciados demonstrados</label>
+        <textarea id="fArt15" rows="4" placeholder="Descreva, com base no memorial e nas atividades lançadas, em que consiste a contribuição singular do servidor..."></textarea>
+      </div>
+    </div>
+
+    <!-- TAB BASE LEGAL -->
+    <div class="tab-content" id="tab-legal" style="display:none;">
+      <div class="panel-head">
+        <h2>Base legal — Decreto nº 13.048/2026, arts. 1º a 22</h2>
+        <p>Referência rápida de todos os artigos do decreto, para consulta durante a análise. Clique em cada item para expandir.</p>
+      </div>
+      <div id="legalList"></div>
+    </div>
+
+    <!-- TAB 7 -->
+    <div class="tab-content" id="tab-parecer" style="display:none;">
+      <div class="panel-head">
+        <h2>Decisão da Comissão</h2>
+        <p>Delibere item a item na aba "Lançamento de atividades" (deferir/indeferir cada documento). Aqui você redige, edita e complementa livremente o parecer, e imprime tudo junto — atividades e texto — em um único documento.</p>
+      </div>
+
+      <div id="parecerStatusBadge"></div>
+
+      <h3 style="font-size:14px; margin:20px 0 10px; font-family:'Inter',sans-serif; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--gold);">Lançamentos de atividades (impressos junto com o parecer)</h3>
+      <div id="parecerActivitySummary"></div>
+
+      <h3 style="font-size:14px; margin:28px 0 10px; font-family:'Inter',sans-serif; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--gold);">Texto do parecer</h3>
+      <div class="no-print" style="margin-bottom:10px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <button class="btn secondary" id="btnEditarParecer">✎ Editar texto</button>
+        <button class="btn" id="btnSalvarParecer" style="display:none;">💾 Salvar edição</button>
+        <button class="btn secondary" id="btnCancelarParecer" style="display:none;">Cancelar</button>
+        <button class="btn secondary" id="btnRegenerarParecer" style="border-color:var(--ink-soft);color:var(--ink-soft);">↻ Descartar edição e gerar de novo</button>
+      </div>
+      <p class="no-print" id="parecerModoAviso" style="font-size:12px;color:var(--ink-soft);margin-top:-4px;">O texto abaixo é gerado automaticamente e se atualiza sozinho conforme você preenche o processo. Clique em "Editar texto" para escrever por cima.</p>
+
+      <div class="parecer-text" id="parecerDisplay" style="min-height:340px;"></div>
+      <textarea class="parecer-text" id="parecerTextarea" style="display:none; min-height:340px; width:100%; font-family:inherit; border:1px solid var(--gold);"></textarea>
+
+      <div style="margin-top:18px;" class="no-print">
+        <button class="btn secondary" onclick="window.print()">Imprimir / salvar como PDF</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ================= DADOS DOS ANEXOS ================= */
+const ANEXOS = {
+  I:{ titulo:"Requisito I — Participação em grupos de trabalho, comissões, comitês, núcleos, representações ou similares", itens:[
+    {n:1,desc:"Exercício de mandato como membro de conselhos superiores e conselhos de unidades e órgãos colegiados da IFE",unidade:"por ano ou fração acima de seis meses",tipo:"ano",pontos:3},
+    {n:2,desc:"Coordenação ou presidência de núcleos, representações, GTs ou similares, comissões ou comitês",unidade:"por designação",tipo:"qtd",pontos:4.5},
+    {n:3,desc:"Participação como membro de núcleos, representações, GTs ou similares, comissões ou comitês",unidade:"por designação",tipo:"qtd",pontos:3},
+    {n:4,desc:"Defensor dativo ou membro de equipe em sindicância, PAD ou tomada de contas especial",unidade:"por designação",tipo:"qtd",pontos:3},
+    {n:5,desc:"Organização, fiscalização ou execução de exame de seleção, vestibular ou concursos",unidade:"por designação",tipo:"qtd",pontos:4.5},
+    {n:6,desc:"Elaboração, revisão e/ou correção de provas de seleção, vestibular ou concursos",unidade:"por designação",tipo:"qtd",pontos:3},
+    {n:7,desc:"Exercício de mandato em entidade sindical da categoria",unidade:"por ano ou fração acima de seis meses",tipo:"ano",pontos:1.5},
+    {n:8,desc:"Membro em programas/projetos de políticas públicas externas, com resultados institucionais relevantes",unidade:"por designação",tipo:"qtd",pontos:3},
+    {n:9,desc:"Representação legal da IFE ou responsabilidade técnica junto a órgãos de fiscalização/controle/regulação",unidade:"por designação",tipo:"qtd",pontos:7.5},
+    {n:10,desc:"Atuação técnica externa autorizada em órgãos estatais/paraestatais, escolas de governo, agências reguladoras ou organismos internacionais",unidade:"por produto",tipo:"qtd",pontos:4.5}
+  ]},
+  II:{ titulo:"Requisito II — Participação e atuação em projetos institucionais, gestão, ensino, pesquisa, extensão, inovação e assistência especializada", itens:[
+    {n:1,desc:"Coordenação de projetos institucionais (ensino, pesquisa, extensão, gestão, inovação)",unidade:"por projeto",tipo:"qtd",pontos:7.5},
+    {n:2,desc:"Atividades técnicas/especializadas em projetos, incl. elaboração de projetos pedagógicos",unidade:"por projeto",tipo:"qtd",pontos:4.5},
+    {n:3,desc:"Participação em comissão ou conselho editorial de livros, revistas ou publicações científicas",unidade:"por mandato",tipo:"qtd",pontos:7.5},
+    {n:4,desc:"Cooperação Técnica Interinstitucional em projetos institucionais",unidade:"por projeto",tipo:"qtd",pontos:3},
+    {n:5,desc:"Orientação, tutoria, preceptoria ou supervisão",unidade:"por designação",tipo:"qtd",pontos:3},
+    {n:6,desc:"Produção ou reformulação de material acessível, ou técnico de referência",unidade:"por produto",tipo:"qtd",pontos:3},
+    {n:7,desc:"Avaliação de trabalho ou atuação como jurado em eventos",unidade:"por evento",tipo:"qtd",pontos:3},
+    {n:8,desc:"Atividade institucional de produção audiovisual, artística, exposição, podcast ou similares",unidade:"por projeto",tipo:"qtd",pontos:3},
+    {n:9,desc:"Programas de formação continuada (≥10h), não usados para aceleração de promoção",unidade:"por capacitação",tipo:"qtd",pontos:1},
+    {n:10,desc:"Atividade técnica especializada formalmente reconhecida, com domínio técnico diferenciado",unidade:"por ano ou fração acima de seis meses",tipo:"ano",pontos:1},
+    {n:11,desc:"Capacitação, fórum, oficina, workshop ou congresso (≥10h)",unidade:"por evento",tipo:"qtd",pontos:1}
+  ]},
+  III:{ titulo:"Requisito III — Recebimento de premiação em evento de reconhecimento público por projetos implementados na administração pública", itens:[
+    {n:1,desc:"Premiação de âmbito internacional",unidade:"por prêmio",tipo:"qtd",pontos:20},
+    {n:2,desc:"Premiação de âmbito nacional",unidade:"por prêmio",tipo:"qtd",pontos:15},
+    {n:3,desc:"Premiação de âmbito local ou institucional formalmente instituído",unidade:"por prêmio",tipo:"qtd",pontos:7.5}
+  ]},
+  IV:{ titulo:"Requisito IV — Designação para assunção de responsabilidades técnico-administrativas ou especializadas", itens:[
+    {n:1,desc:"Atuação qualificada em operação/implantação/suporte/desenvolvimento de sistemas estruturantes",unidade:"por sistema",tipo:"qtd",pontos:4.5},
+    {n:2,desc:"Elaboração de projeto básico/termo de referência ou equipe de planejamento de contratação",unidade:"por designação",tipo:"qtd",pontos:3},
+    {n:3,desc:"Gestão ou fiscalização de contratos, convênios ou instrumentos correlatos",unidade:"por designação",tipo:"qtd",pontos:4.5},
+    {n:4,desc:"Atividades relacionadas à licitação e suas excepcionalidades",unidade:"por ano ou fração acima de seis meses",tipo:"ano",pontos:3},
+    {n:5,desc:"Apoio técnico especializado em saúde, acessibilidade ou diversidade de interesse institucional",unidade:"por ano ou fração acima de seis meses",tipo:"ano",pontos:3},
+    {n:6,desc:"Atuação em ambientes/processos com condições especiais de segurança (sem adicional de periculosidade/insalubridade)",unidade:"por ano ou fração acima de seis meses",tipo:"ano",pontos:3},
+    {n:7,desc:"Atuação em sistemas/processos institucionais não habituais do cargo",unidade:"por designação",tipo:"qtd",pontos:3},
+    {n:8,desc:"Responsável por setor/unidade formalmente designado, sem remuneração adicional",unidade:"por ano ou fração acima de seis meses",tipo:"ano",pontos:4.5}
+  ]},
+  V:{ titulo:"Requisito V — Exercício de função ou cargo de direção ou de assessoramento institucional", itens:[
+    {n:1,desc:"Cargo de direção (CD-02) ou equivalente",unidade:"por ano ou fração acima de seis meses",tipo:"ano-dupla",titular:9,substituto:4.5},
+    {n:2,desc:"Cargo de direção (CD-03/04) ou equivalente",unidade:"por ano ou fração acima de seis meses",tipo:"ano-dupla",titular:7.5,substituto:3},
+    {n:3,desc:"Função gratificada FG-01/02 ou equivalente",unidade:"por ano ou fração acima de seis meses",tipo:"ano-dupla",titular:4.5,substituto:1.5},
+    {n:4,desc:"Função gratificada a partir de FG-03 ou equivalente",unidade:"por ano ou fração acima de seis meses",tipo:"ano-dupla",titular:3,substituto:1}
+  ]},
+  VI:{ titulo:"Requisito VI — Produção, prospecção e difusão de conhecimento científico ou técnico", itens:[
+    {n:1,desc:"Carta patente relacionada a interesses institucionais",unidade:"por patente",tipo:"qtd",pontos:30},
+    {n:2,desc:"Desenvolvimento relevante de protótipos, PI ou privilégio de invenção",unidade:"por projeto",tipo:"qtd",pontos:25},
+    {n:3,desc:"Transferência de tecnologia, licenciamento ou exploração de ativo tecnológico",unidade:"por produto",tipo:"qtd",pontos:20},
+    {n:4,desc:"Conclusão de curso superior ao exigido, não usado para percepção de IQ",unidade:"por curso",tipo:"qtd",pontos:15},
+    {n:5,desc:"Implantação/desenvolvimento relevante de produto, processo, técnica ou tecnologia",unidade:"por produto",tipo:"qtd",pontos:15},
+    {n:6,desc:"Liderança ou vice-liderança de grupo de pesquisa/extensão registrado",unidade:"por grupo de pesquisa",tipo:"qtd",pontos:7.5},
+    {n:7,desc:"Membro de grupo de pesquisa devidamente registrado",unidade:"por projeto",tipo:"qtd",pontos:3},
+    {n:8,desc:"Aprovação de projeto para captação de recursos para a IFE",unidade:"por projeto",tipo:"qtd",pontos:7.5},
+    {n:9,desc:"Publicação ou organização de livro (ISBN e Conselho Editorial)",unidade:"por produto",tipo:"qtd",pontos:20},
+    {n:10,desc:"Autoria/coautoria de capítulo de livro ou artigo em periódico especializado",unidade:"por publicação",tipo:"qtd",pontos:7.5},
+    {n:11,desc:"Apresentação de trabalho em congresso, seminário ou evento",unidade:"por produto",tipo:"qtd",pontos:4.5},
+    {n:12,desc:"Produção de material técnico, científico, metodológico ou administrativo estruturado",unidade:"por produto",tipo:"qtd",pontos:4.5},
+    {n:13,desc:"Avaliação de projeto de ensino, pesquisa, extensão ou inovação",unidade:"por projeto",tipo:"qtd",pontos:4.5},
+    {n:14,desc:"Difusão ou apoio à formação institucional (expositor, facilitador, colaborador)",unidade:"por evento",tipo:"qtd",pontos:3},
+    {n:15,desc:"Instrutor, tutor, palestrante, autor de conteúdo técnico ou orientador em ação formativa estruturada",unidade:"por curso",tipo:"qtd",pontos:4.5},
+    {n:16,desc:"Coordenação de congresso, simpósio ou seminário de interesse institucional",unidade:"por evento",tipo:"qtd",pontos:3.5},
+    {n:17,desc:"Coorientação de trabalho de conclusão de curso",unidade:"por evento",tipo:"qtd",pontos:4.5},
+    {n:18,desc:"Autoria de obra artística ou cultural com repercussão institucional comprovada",unidade:"por produto",tipo:"qtd",pontos:3},
+    {n:19,desc:"Atuação institucional no enfrentamento de surto, epidemia ou pandemia",unidade:"por mês",tipo:"mes",pontos:1}
+  ]}
+};
+
+const NIVEIS = [
+  {key:"RSC-I",  idx:0, pontos:10, criterios:0, diversidade:null,               credencial:"Sem ensino fundamental completo"},
+  {key:"RSC-II", idx:1, pontos:15, criterios:2, diversidade:null,               credencial:"Ensino fundamental completo"},
+  {key:"RSC-III",idx:2, pontos:25, criterios:2, diversidade:null,               credencial:"Ensino médio ou técnico completo"},
+  {key:"RSC-IV", idx:3, pontos:30, criterios:3, diversidade:["II","IV","V","VI"], credencial:"Graduação"},
+  {key:"RSC-V",  idx:4, pontos:52, criterios:5, diversidade:["IV","V","VI"],    credencial:"Especialização"},
+  {key:"RSC-VI", idx:5, pontos:75, criterios:7, diversidade:["VI"],             credencial:"Mestrado"}
+];
+
+const ART14_CAPUT = "O RSC-PCCTAE poderá ser indeferido, ainda que atendidos os requisitos estabelecidos no art. 3º, com base na verificação do atendimento dos seguintes critérios objetivos:";
+const ART14 = [
+  "obtenção da pontuação e atendimento da quantidade de critérios específicos e dos requisitos previstos no art. 5º, caput e § 1º;",
+  "utilização única de cada atividade ou experiência relativa ao critério específico apresentado, conforme o disposto no art. 5º, § 3º;",
+  "comprovação documental, conforme o disposto no art. 4º;",
+  "cumprimento do interstício de três anos, contado da data da última concessão, conforme o disposto no art. 11;",
+  "cumprimento do estágio probatório, conforme o disposto no art. 12;",
+  "realização de atividades e experiências exclusivamente no exercício do cargo ocupado, conforme o disposto no art. 12, parágrafo único;",
+  "instrução do requerimento, conforme a documentação prevista no art. 13;",
+  "apresentação do memorial, conforme o disposto no art. 13, caput, inciso II;",
+  "demonstração de desenvolvimento de saberes, competências, inovação, ampliação de responsabilidades ou obtenção de resultados institucionais relevantes, conforme o disposto no art. 15; e",
+  "observância do percentual máximo de concessão e da disponibilidade orçamentária estabelecidos no art. 12-C, § 1º, da Lei nº 11.091, de 12 de janeiro de 2005."
+];
+const ART14_PERGUNTAS = [
+  "O servidor atingiu a pontuação mínima E a quantidade mínima de critérios específicos exigidos para o nível pleiteado — incluindo a diversidade obrigatória entre incisos, quando exigida (RSC-IV a VI)?",
+  "Nenhuma atividade apresentada foi usada em mais de um critério específico ao mesmo tempo? (Confira se o mesmo documento não foi lançado duas vezes em critérios diferentes.)",
+  "Todas as atividades pontuadas têm documento comprobatório de um dos tipos aceitos pelo art. 4º (portaria, diploma, certidão, ata, relatório técnico, declaração etc.)?",
+  "Já se passaram pelo menos 3 anos desde a última concessão de RSC a este servidor? (Marque 'Atende' também se for a primeira concessão — nesse caso não há interstício a cumprir.)",
+  "O servidor já concluiu o estágio probatório no cargo atual?",
+  "Todas as atividades apresentadas foram realizadas no exercício de um cargo do PCCTAE do próprio servidor — e não em atividade estranha ao cargo?",
+  "O requerimento veio com todos os documentos exigidos: formulário padrão, memorial e documentação comprobatória (art. 13)?",
+  "O servidor apresentou o memorial descrevendo a trajetória profissional, vinculado aos requisitos do art. 3º?",
+  "O memorial e as atividades demonstram, de forma fundamentada, saberes e competências diferenciados — que vão além da simples execução ordinária do cargo? (Isto é o que você vai registrar no campo de fundamentação do art. 15, logo abaixo.)",
+  "A concessão não ultrapassa o limite de 75% dos servidores do PCCTAE da instituição já recebendo RSC, e há disponibilidade orçamentária para o pagamento?"
+];
+
+const ARTIGOS = [
+  {n:"Art. 1º", t:"Objeto", d:"Estabelece os critérios e procedimentos para a concessão do RSC-PCCTAE, estruturado pela Lei nº 11.091/2005."},
+  {n:"Art. 2º", t:"Definição do RSC-PCCTAE", d:"Reconhecimento do saber não instituído do servidor ativo, resultante da atuação profissional no exercício do cargo, na dinâmica de ensino, pesquisa e extensão. Parágrafo único: concedido pela própria Instituição Federal de Ensino de lotação do servidor."},
+  {n:"Art. 3º", t:"Requisitos gerais (caput, incisos I a VI)", d:"Concessão condicionada à comprovação de ao menos 1 dos 6 requisitos gerais: participação em GTs/comissões (I), projetos institucionais (II), premiação (III), responsabilidades técnico-administrativas (IV), função/cargo de direção (V), produção de conhecimento (VI). Este artigo não possui parágrafos — as regras de vedação à dupla contagem e de exclusão de atividades meramente ordinárias estão no art. 5º, §§ 3º e 4º, não aqui."},
+  {n:"Art. 4º", t:"Comprovação documental", d:"Concessão condicionada à comprovação dos requisitos do art. 3º. Parágrafo único, incisos I a VII: lista taxativa dos documentos válidos (ver aba 'Documentos válidos')."},
+  {n:"Art. 5º", t:"Níveis, pontuação e Incentivo à Qualificação", d:"Seis níveis crescentes com pontuação, critérios específicos mínimos e diversidade obrigatória (incisos IV a VI). § 1º: escala de IQ de 10% a 75% vinculada à escolaridade. § 2º: pontuação cumulativa entre concessões. § 3º: cada atividade só pode pontuar uma vez, vedada dupla contagem; sobreposição é resolvida por avaliação fundamentada da Comissão. § 4º: não pontuam atividades que representem apenas o desempenho ordinário do cargo, sem inovação, ampliação de responsabilidades ou resultados institucionais relevantes."},
+  {n:"Art. 6º", t:"Instituição da CRSC-PCCTAE", d:"Cada IFE institui sua Comissão por ato da autoridade máxima. § 1º: observa o Decreto nº 12.002/2024. § 2º: pode ser organizada de forma descentralizada por campi ou unidades."},
+  {n:"Art. 7º", t:"Composição da Comissão", d:"3 a 9 membros titulares + suplentes, indicação paritária entre Conselho Superior, CIS e gestão de pessoas. § 1º: mandato de 2 anos, renovável 1 vez. § 2º: membros devem ser servidores estáveis do PCCTAE. § 5º: observar impedimento e suspeição (Lei 9.784/1999). § 6º: função não remunerada, considerada serviço público relevante."},
+  {n:"Art. 8º", t:"Competências da CRSC-PCCTAE", d:"Estabelecer fluxos internos; analisar o mérito dos memoriais em até 120 dias; verificar documentação; deferir/indeferir com decisão fundamentada; zelar por prazos e critérios; registrar informações; publicar os memoriais no site antes da decisão."},
+  {n:"Art. 9º", t:"Regimento interno e quórum", d:"Cada Comissão define, em regimento próprio homologado pela autoridade máxima, os ritos e cronogramas de análise. Parágrafo único: quórum de reunião é maioria simples; quórum de deliberação é de dois terços dos membros."},
+  {n:"Art. 10", t:"Efeitos financeiros", d:"O Incentivo à Qualificação passa a valer a partir da data do deferimento, sem retroagir ao protocolo. Parágrafo único: se a concessão ultrapassar o prazo do art. 8º, II (120 dias), os efeitos retroagem ao dia seguinte ao término desse prazo."},
+  {n:"Art. 11", t:"Interstício", d:"O RSC só pode ser requerido novamente após 3 anos contados da data da última concessão."},
+  {n:"Art. 12", t:"Estágio probatório", d:"O RSC não é concedido a servidores em estágio probatório. Parágrafo único: as atividades realizadas a qualquer tempo — inclusive durante o estágio — podem ser consideradas depois, desde que no exercício do cargo."},
+  {n:"Art. 13", t:"Instrução do requerimento", d:"Mínimo: formulário padrão (dados funcionais, nível pleiteado, saldo de pontos), memorial (trajetória vinculada ao art. 3º) e documentação comprobatória. § 2º: a Comissão pode pedir documentação complementar ou realizar diligências. § 3º: o memorial deve ser publicado no site da IFE antes da decisão, respeitada a LGPD (Lei 13.709/2018)."},
+  {n:"Art. 14", t:"Hipóteses de indeferimento", d:"Lista de 10 critérios objetivos que podem levar ao indeferimento mesmo com os requisitos do art. 3º atendidos — ver aba 'Checklist arts. 14 e 15'."},
+  {n:"Art. 15", t:"Fundamentação do mérito", d:"Ao conceder o RSC, a Comissão deve atestar de forma fundamentada que o requerente possui saberes e competências diferenciados, que qualificam a execução das atribuições do cargo e contribuem de forma singular para os resultados institucionais. Exigência distinta e adicional ao mero atingimento de pontuação."},
+  {n:"Art. 16", t:"Recurso", d:"Cabe recurso da decisão da Comissão à instância deliberativa máxima da IFE, em até 30 dias contados da ciência ou divulgação oficial da decisão, nos termos da Lei nº 9.784/1999."},
+  {n:"Art. 17", t:"Ato de concessão", d:"A concessão é efetivada por ato administrativo da autoridade máxima da IFE. Admite delegação de competência; veda expressamente a subdelegação."},
+  {n:"Art. 18", t:"Prazo de implantação institucional", d:"A IFE tem até 30 dias da publicação do decreto (3/7/2026) para instituir a CRSC-PCCTAE, aprovar suas normas internas e iniciar os procedimentos de análise."},
+  {n:"Art. 19", t:"Acompanhamento pelo MEC", d:"O MEC acompanha a concessão do RSC quanto ao limite de 75% dos servidores PCCTAE, à integridade dos processos e à disponibilidade orçamentária. § 2º: divulgação anual do percentual de servidores com RSC, por instituição."},
+  {n:"Art. 20", t:"Competência da CGU", d:"Expedir orientações às unidades de controle interno das IFEs e avaliar os processos de concessão após os procedimentos de gestão e supervisão adotados pelas instituições."},
+  {n:"Art. 21", t:"Atos complementares do MEC", d:"O MEC pode editar atos complementares para disciplinar aspectos operacionais e normativos, inclusive para uniformizar a aplicação dos critérios dos Anexos I a VI."},
+  {n:"Art. 22", t:"Vigência", d:"O decreto entra em vigor na data de sua publicação — 3 de julho de 2026."}
+];
+
+/* ================= ESTADO ================= */
+let atividades = [];
+let art14Estado = ART14.map(()=>({status:"nv", obs:""}));
+
+/* ================= TABS ================= */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t=>t.style.display='none');
+    btn.classList.add('active');
+    document.getElementById('tab-'+btn.dataset.tab).style.display='block';
+    if(btn.dataset.tab==='niveis') renderNiveis();
+    if(btn.dataset.tab==='parecer') renderParecer();
+  });
+});
+
+/* ================= TAB 1 — DADOS ================= */
+document.querySelectorAll('input[name=fTeveRsc]').forEach(r=>r.addEventListener('change', e=>{
+  document.getElementById('fDataUltimaWrap').style.display = e.target.value==='sim' ? 'block':'none';
+  renderPreAlert();
+}));
+document.querySelectorAll('input[name=fEstagio]').forEach(r=>r.addEventListener('change', renderPreAlert));
+document.getElementById('fDataUltima').addEventListener('change', renderPreAlert);
+document.getElementById('fEscolaridade').addEventListener('change', ()=>{renderBadge(); renderNiveis();});
+
+function renderPreAlert(){
+  const estagio = document.querySelector('input[name=fEstagio]:checked').value==='sim';
+  const teveRsc = document.querySelector('input[name=fTeveRsc]:checked').value==='sim';
+  let html='';
+  if(estagio){
+    html += '<div class="warning-box" style="border-color:var(--red);background:var(--red-bg);color:var(--red);"><strong>Bloqueio — Art. 12:</strong> servidor em estágio probatório. O RSC não pode ser concedido agora. Atividades já realizadas no exercício do cargo poderão ser aproveitadas após o fim do estágio.</div>';
+  }
+  if(teveRsc){
+    const dataUltima = document.getElementById('fDataUltima').value;
+    if(dataUltima){
+      const limite = new Date(dataUltima);
+      limite.setFullYear(limite.getFullYear()+3);
+      const hoje = new Date();
+      const hint = document.getElementById('interSticioHint');
+      if(hoje < limite){
+        hint.innerHTML = '<span style="color:var(--red);font-weight:600;">Interstício não cumprido — libera em '+limite.toLocaleDateString('pt-BR')+'</span>';
+        html += '<div class="warning-box" style="border-color:var(--red);background:var(--red-bg);color:var(--red);"><strong>Bloqueio — Art. 11:</strong> interstício de 3 anos ainda não cumprido. Próximo pedido possível a partir de '+limite.toLocaleDateString('pt-BR')+'.</div>';
+      } else {
+        hint.innerHTML = '<span style="color:var(--green);font-weight:600;">Interstício cumprido.</span>';
+      }
+    }
+  }
+  document.getElementById('preAlertBox').innerHTML = html;
+  renderBadge();
+}
+['fNome','fCargo','fPretendido','fProtocolo'].forEach(id=>document.getElementById(id).addEventListener('input', renderBadge));
+
+/* ================= TAB 2 — ATIVIDADES ================= */
+const eAnexo = document.getElementById('eAnexo');
+const eItem = document.getElementById('eItem');
+const eTipoWrap = document.getElementById('eTipoWrap');
+const eTipo = document.getElementById('eTipo');
+const eQtd = document.getElementById('eQtd');
+const eQtdLabel = document.getElementById('eQtdLabel');
+const ePontosPreview = document.getElementById('ePontosPreview');
+
+Object.keys(ANEXOS).forEach(k=>{
+  const opt = document.createElement('option');
+  opt.value=k; opt.textContent = 'Anexo '+k+' — '+ANEXOS[k].titulo.split('—')[1].trim();
+  eAnexo.appendChild(opt);
+});
+
+function populateItens(){
+  eItem.innerHTML='';
+  const anexo = ANEXOS[eAnexo.value];
+  anexo.itens.forEach(it=>{
+    const opt = document.createElement('option');
+    opt.value = it.n;
+    const pts = it.tipo==='ano-dupla' ? (it.titular+' / '+it.substituto+' pts') : (it.pontos+' pts');
+    opt.textContent = 'Item '+it.n+' — '+it.desc+' ('+it.unidade+', '+pts+')';
+    eItem.appendChild(opt);
+  });
+  updateEntryUI();
+}
+function currentItem(){
+  const anexo = ANEXOS[eAnexo.value];
+  return anexo.itens.find(i=>i.n==eItem.value);
+}
+function updateEntryUI(){
+  const it = currentItem();
+  if(!it) return;
+  eTipoWrap.style.display = it.tipo==='ano-dupla' ? 'block':'none';
+  if(it.tipo==='ano'||it.tipo==='ano-dupla'){ eQtdLabel.textContent='Anos de exercício (ex.: 1.4)'; eQtd.step='0.1'; }
+  else if(it.tipo==='mes'){ eQtdLabel.textContent='Número de meses'; eQtd.step='1'; }
+  else { eQtdLabel.textContent='Quantidade ('+it.unidade.replace('por ','')+')'; eQtd.step='1'; }
+  updatePreview();
+}
+function computeAnos(dec){
+  const inteiro = Math.floor(dec);
+  const fracao = dec - inteiro;
+  return inteiro + (fracao > 0.5 ? 1 : 0);
+}
+function computePontos(it, qtd, tipoDupla){
+  qtd = parseFloat(qtd)||0;
+  if(it.tipo==='ano'){ return computeAnos(qtd) * it.pontos; }
+  if(it.tipo==='ano-dupla'){ const rate = tipoDupla==='substituto' ? it.substituto : it.titular; return computeAnos(qtd) * rate; }
+  if(it.tipo==='mes'){ return Math.round(qtd) * it.pontos; }
+  return Math.round(qtd) * it.pontos;
+}
+function updatePreview(){
+  const it = currentItem();
+  if(!it) return;
+  const pts = computePontos(it, eQtd.value, eTipo.value);
+  ePontosPreview.textContent = 'Pontuação calculada: ' + pts.toFixed(1).replace('.0','') + ' pontos';
+}
+eAnexo.addEventListener('change', populateItens);
+eItem.addEventListener('change', updateEntryUI);
+eTipo.addEventListener('change', updatePreview);
+eQtd.addEventListener('input', updatePreview);
+try{ populateItens(); }catch(e){ console.error('Erro ao popular itens:', e); }
+
+document.getElementById('btnAddAtividade').addEventListener('click', ()=>{
+  const it = currentItem();
+  const qtd = parseFloat(eQtd.value)||0;
+  if(qtd<=0){ alert('Informe uma quantidade maior que zero.'); return; }
+  const pontos = computePontos(it, qtd, eTipo.value);
+  atividades.push({
+    id: Date.now(),
+    anexo: eAnexo.value,
+    itemN: it.n,
+    desc: it.desc,
+    unidade: it.unidade,
+    tipoDupla: it.tipo==='ano-dupla' ? eTipo.value : null,
+    qtd: qtd,
+    pontos: pontos,
+    documento: document.getElementById('eDoc').value.trim(),
+    tipoDoc: document.getElementById('eTipoDoc').value,
+    obs: document.getElementById('eObs').value.trim(),
+    status: 'pendente',
+    motivo: ''
+  });
+  document.getElementById('eDoc').value='';
+  document.getElementById('eObs').value='';
+  eQtd.value=1;
+  renderAtividades();
+  renderBadge();
+});
+
+function renderAtividades(){
+  const tbody = document.getElementById('atividadesTbody');
+  if(atividades.length===0){
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="8">Nenhuma atividade lançada ainda.</td></tr>';
+  } else {
+    tbody.innerHTML = atividades.map(a=>{
+      const qtdLabel = a.tipoDupla ? computeAnos(a.qtd)+' ano(s) — '+a.tipoDupla : (a.unidade.includes('ano')?computeAnos(a.qtd)+' ano(s)':a.qtd);
+      const statusSelect = '<select onchange="setAtividadeStatus('+a.id+',this.value)" style="border:1px solid var(--line);padding:5px 8px;font-size:12.5px;border-radius:2px;'
+        + (a.status==='deferido' ? 'background:var(--green-bg);color:var(--green);' : a.status==='indeferido' ? 'background:var(--red-bg);color:var(--red);' : 'background:var(--amber-bg);color:var(--amber);') + '">'
+        + '<option value="pendente" '+(a.status==='pendente'?'selected':'')+'>Pendente</option>'
+        + '<option value="deferido" '+(a.status==='deferido'?'selected':'')+'>Deferir</option>'
+        + '<option value="indeferido" '+(a.status==='indeferido'?'selected':'')+'>Indeferir</option>'
+        + '</select>';
+      const motivoField = a.status==='indeferido'
+        ? '<input type="text" value="'+(a.motivo||'').replace(/"/g,'&quot;')+'" placeholder="Motivo do indeferimento" onchange="setAtividadeMotivo('+a.id+',this.value)" style="margin-top:6px;width:100%;border:1px solid var(--line);padding:5px 8px;font-size:12px;border-radius:2px;">'
+        : '';
+      return '<tr>'
+        +'<td><span class="tagmini">Anexo '+a.anexo+'</span></td>'
+        +'<td>Item '+a.itemN+' — '+a.desc+(a.obs?'<br><span style="color:var(--ink-soft);font-size:12px;">'+a.obs+'</span>':'')+'</td>'
+        +'<td>'+(a.documento||'<span style="color:var(--ink-soft);">— não informado —</span>')+'</td>'
+        +'<td><span class="tagmini">'+(a.tipoDoc||'—')+'</span></td>'
+        +'<td class="num">'+qtdLabel+'</td>'
+        +'<td class="num">'+a.pontos.toFixed(1).replace('.0','')+'</td>'
+        +'<td style="min-width:150px;">'+statusSelect+motivoField+'</td>'
+        +'<td class="no-print"><button class="btn danger" onclick="removeAtividade('+a.id+')">Remover</button></td>'
+        +'</tr>';
+    }).join('');
+  }
+  renderDuplicidade();
+  renderPendentes();
+  renderBadge();
+}
+function setAtividadeStatus(id,val){
+  const a = atividades.find(x=>x.id===id);
+  if(a){ a.status = val; if(val!=='indeferido') a.motivo=''; }
+  renderAtividades();
+}
+function setAtividadeMotivo(id,val){
+  const a = atividades.find(x=>x.id===id);
+  if(a) a.motivo = val;
+}
+function renderPendentes(){
+  const pend = atividades.filter(a=>a.status==='pendente').length;
+  const box = document.getElementById('pendentesAlert');
+  box.innerHTML = pend>0
+    ? '<div class="warning-box"><strong>'+pend+' atividade(s) pendente(s) de decisão.</strong> Somente atividades marcadas como "Deferir" entram na apuração de pontos e critérios (aba "Apuração de nível") e no parecer final.</div>'
+    : '';
+}
+function removeAtividade(id){
+  atividades = atividades.filter(a=>a.id!==id);
+  renderAtividades();
+  renderBadge();
+}
+function renderDuplicidade(){
+  const docs = {};
+  atividades.forEach(a=>{
+    if(!a.documento) return;
+    const key = a.documento.toLowerCase().trim();
+    docs[key] = docs[key] || [];
+    docs[key].push(a);
+  });
+  const dups = Object.values(docs).filter(list=>{
+    const criterios = new Set(list.map(a=>a.anexo+'-'+a.itemN));
+    return list.length>1 && criterios.size>1;
+  });
+  const box = document.getElementById('duplicidadeAlert');
+  if(dups.length===0){ box.innerHTML=''; return; }
+  box.innerHTML = dups.map(list=>
+    '<div class="warning-box" style="border-color:var(--red);background:var(--red-bg);color:var(--red);"><strong>Possível duplicidade — Art. 5º, § 3º:</strong> o documento "'+list[0].documento+'" foi lançado em '+list.length+' critérios específicos diferentes ('+[...new Set(list.map(a=>'Anexo '+a.anexo+', item '+a.itemN))].join('; ')+'). A mesma atividade não pode pontuar em mais de um critério — verifique o enquadramento correto antes de manter as duas entradas.</div>'
+  ).join('');
+}
+
+/* ================= TAB 3 — NÍVEIS ================= */
+function distinctCriteria(){ return new Set(atividades.filter(a=>a.status==='deferido').map(a=>a.anexo+'-'+a.itemN)); }
+function totalPontos(){ return atividades.filter(a=>a.status==='deferido').reduce((s,a)=>s+a.pontos,0); }
+function anexosUsados(){ return new Set(atividades.filter(a=>a.status==='deferido').map(a=>a.anexo)); }
+
+function checkNivel(n){
+  const pontos = totalPontos();
+  const criterios = distinctCriteria().size;
+  const anexos = anexosUsados();
+  const pontosOk = pontos >= n.pontos;
+  const criteriosOk = criterios >= n.criterios;
+  const diversidadeOk = !n.diversidade || n.diversidade.some(a=>anexos.has(a));
+  return {pontosOk, criteriosOk, diversidadeOk, overall: pontosOk && criteriosOk && diversidadeOk};
+}
+function nivelAlcancadoPorPontos(){
+  for(let i=NIVEIS.length-1;i>=0;i--){ if(checkNivel(NIVEIS[i]).overall) return NIVEIS[i]; }
+  return null;
+}
+function nivelFinal(){
+  const porPontos = nivelAlcancadoPorPontos();
+  if(!porPontos) return null;
+  const credIdx = parseInt(document.getElementById('fEscolaridade').value||0);
+  return porPontos.idx <= credIdx ? porPontos : NIVEIS[credIdx];
+}
+
+function renderNiveis(){
+  const pontos = totalPontos();
+  const criterios = distinctCriteria().size;
+  document.getElementById('sPontos').textContent = pontos.toFixed(1).replace('.0','');
+  document.getElementById('sCriterios').textContent = criterios;
+  const pn = nivelAlcancadoPorPontos();
+  document.getElementById('sNivelPontos').textContent = pn ? pn.key : 'Nenhum';
+  const nf = nivelFinal();
+  document.getElementById('sNivelFinal').textContent = nf ? nf.key : 'Nenhum';
+
+  document.getElementById('nivelTbody').innerHTML = NIVEIS.map(n=>{
+    const r = checkNivel(n);
+    const isCurrent = pn && pn.key===n.key;
+    return '<tr class="'+(isCurrent?'row-current':'')+'">'
+      +'<td><strong>'+n.key+'</strong><br><span style="font-size:11px;color:var(--ink-soft);">'+n.credencial+'</span></td>'
+      +'<td>'+n.pontos+'<br><span class="'+(r.pontosOk?'check-yes':'check-no')+'">'+(r.pontosOk?'✓':'✗')+'</span></td>'
+      +'<td>'+(n.criterios||'—')+'<br><span class="'+(r.criteriosOk?'check-yes':'check-no')+'">'+(r.criteriosOk?'✓':'✗')+'</span></td>'
+      +'<td>'+(n.diversidade?('incisos '+n.diversidade.join('/')):'—')+'<br><span class="'+(n.diversidade?(r.diversidadeOk?'check-yes':'check-no'):'check-na')+'">'+(n.diversidade?(r.diversidadeOk?'✓':'✗'):'n/a')+'</span></td>'
+      +'<td>'+(r.overall?'<span class="pill ok">atendido</span>':'<span class="pill no">não atendido</span>')+'</td>'
+      +'</tr>';
+  }).join('');
+  renderBadge();
+}
+
+/* ================= TAB 4 — ART 14 ================= */
+function renderArt14(){
+  document.getElementById('art14Caput').textContent = ART14_CAPUT;
+  const romanos = ['I','II','III','IV','V','VI','VII','VIII','IX','X'];
+  document.getElementById('art14List').innerHTML = ART14.map((txt,i)=>
+    '<div class="art14-item">'
+    +'<span class="idx">'+romanos[i]+'</span>'
+    +'<span class="txt">'
+      +'<strong style="display:block;color:var(--ink);margin-bottom:6px;">'+ART14_PERGUNTAS[i]+'</strong>'
+      +'<span style="display:block;font-style:italic;color:var(--ink-soft);font-size:12.5px;">Texto da lei: "'+romanos[i]+' - '+txt+'"</span>'
+    +'</span>'
+    +'<select onchange="setArt14('+i+',this.value)">'
+    +'<option value="nv" '+(art14Estado[i].status==='nv'?'selected':'')+'>Não verificado</option>'
+    +'<option value="ok" '+(art14Estado[i].status==='ok'?'selected':'')+'>Atende</option>'
+    +'<option value="no" '+(art14Estado[i].status==='no'?'selected':'')+'>Não atende</option>'
+    +'</select>'
+    +'</div>'
+  ).join('');
+}
+function setArt14(i,val){ art14Estado[i].status = val; renderBadge(); }
+try{ renderArt14(); }catch(e){ console.error('Erro ao renderizar checklist art.14:', e); }
+
+/* ================= PROMPT DE IA — ART. 15 ================= */
+function buildAnexosReferenceText(){
+  const romanReq = {I:'Requisito I — Participação em grupos de trabalho, comissões, comitês, núcleos, representações ou similares',
+    II:'Requisito II — Participação e atuação em projetos institucionais, gestão, ensino, pesquisa, extensão, inovação e assistência especializada',
+    III:'Requisito III — Recebimento de premiação em evento de reconhecimento público por projetos implementados na administração pública',
+    IV:'Requisito IV — Designação para assunção de responsabilidades técnico-administrativas ou especializadas',
+    V:'Requisito V — Exercício de função ou cargo de direção ou de assessoramento institucional',
+    VI:'Requisito VI — Produção, prospecção e difusão de conhecimento científico ou técnico'};
+  let out = '';
+  Object.keys(ANEXOS).forEach(k=>{
+    out += '\nAnexo '+k+' — '+romanReq[k]+'\n';
+    ANEXOS[k].itens.forEach(it=>{
+      const pts = it.tipo==='ano-dupla' ? (it.titular+' pts titular / '+it.substituto+' pts substituto') : (it.pontos+' pts');
+      out += '  Item '+it.n+' — '+it.desc+' ('+it.unidade+'; '+pts+')\n';
+    });
+  });
+  return out;
+}
+
+const PROMPT_ART15 =
+`Você é um assessor técnico da Comissão de RSC-PCCTAE (Decreto nº 13.048/2026).
+A validade formal dos documentos (art. 4º) já foi conferida por mim — não
+avalie isso. Sua tarefa: verificar (1) a correspondência entre memorial e
+documentos, e (2) se cada atividade comprova o exigido pelo art. 15, com
+avaliação fundamentada e proporcional — nem permissiva demais, nem rígida
+a ponto de exigir prova pericial para cada linha.
+
+BASE LEGAL:
+
+Art. 15 (texto integral): "A CRSC-PCCTAE, ao conceder o RSC-PCCTAE, deverá,
+em sua decisão, atestar de forma fundamentada que o requerente possui
+saberes e competências diferenciados, que qualificam a execução ordinária
+das atribuições do cargo e contribuem de maneira singular para o
+aprimoramento de sua atuação ou da consecução dos resultados institucionais."
+
+Art. 5º, § 4º: "Não serão consideradas, para fins de pontuação, atividades
+e experiências que representem exclusivamente o desempenho ordinário das
+atribuições legais do cargo, sem demonstração de desenvolvimento de saberes,
+competências, inovação, ampliação de responsabilidades ou obtenção de
+resultados institucionais relevantes." Uma atividade sem diferenciação
+comprovada perde o direito aos pontos que estava contando — isso é efeito
+direto na pontuação, não só uma exigência de texto.
+
+Art. 5º, caput — pontos mínimos e critérios específicos mínimos por nível:
+RSC-I: 10 pontos | RSC-II: 15 pontos, 2 critérios | RSC-III: 25 pontos, 2
+critérios | RSC-IV: 30 pontos, 3 critérios (≥1 dos incisos II/IV/V/VI do
+art. 3º) | RSC-V: 52 pontos, 5 critérios (≥1 dos incisos IV/V/VI) | RSC-VI:
+75 pontos, 7 critérios (≥1 do inciso VI).
+
+TABELA DE PONTOS — TODOS OS CRITÉRIOS ESPECÍFICOS DOS ANEXOS I A VI (use
+esta tabela para saber quantos pontos vale cada atividade, e para calcular
+os descontos):
+${buildAnexosReferenceText()}
+
+COMO AVALIAR ATIVIDADES AGRUPADAS (mesma justificativa cobrindo várias
+designações): dê o benefício da dúvida ao grupo inteiro quando a prática ou
+ferramenta descrita, pela sua própria natureza, se aplicaria a todas as
+atividades do grupo (ex.: uma planilha de controle criada para acompanhar
+"os contratos sob minha fiscalização" plausivelmente vale para todos eles).
+Só separe uma atividade específica do grupo quando houver um SINAL CLARO de
+que ela não está coberta — por exemplo: (a) um recorte temporal explícito
+("nos processos mais recentes", "a partir de determinado momento") que
+exclua atividades anteriores a essa data; ou (b) a citação nominal de
+alguns casos específicos dentro do grupo de um jeito que sugere exclusão
+dos demais (ex.: "documento juntado aos autos dos processos X e Y", quando
+o grupo tem sete processos). Fora esses sinais claros, não fragmente o
+grupo — trate como uma unidade.
+
+CRITÉRIO DE DIFERENCIAÇÃO:
+CONTA: fato específico (número, sistema, valor, decisão, resultado
+institucional nomeado) ou prática/ferramenta cuja natureza plausivelmente
+extrapola a rotina esperada do cargo.
+NÃO CONTA: só adjetivo sem fato por trás ("contribuí", "trouxe mais
+segurança"), ou uma prova mencionada no texto (ex. "registrado por e-mail")
+que não aparece na lista de documentos comprobatórios anexados.
+
+EXCEÇÃO — créditos por credencial (ex.: Anexo VI, item 4, conclusão de
+curso): quando os pontos de um item decorrem da simples posse de uma
+credencial que atenda à definição do próprio item (não de uma designação/
+ação), avalie pela definição do item em si (curso concluído, superior ao
+exigido, não usado para IQ ordinária) — não pela força da narrativa de
+mérito que o acompanha.
+
+TAREFA — PARTE 1: CORRESPONDÊNCIA MEMORIAL x DOCUMENTOS (arts. 13 e 14, III)
+1. Liste cada atividade do memorial e diga se há documento correspondente,
+   indicando qual.
+2. Sinalize atividades sem documento, documentos sem atividade
+   correspondente, e possíveis duplicidades (art. 5º, § 3º).
+
+TAREFA — PARTE 2: MÉRITO (ART. 15 e ART. 5º, § 4º)
+Use só as atividades confirmadas na Parte 1.
+3. Para cada atividade (ou grupo coeso, quando aplicável — ver regra acima),
+   diga se é DIFERENCIADA ou ORDINÁRIA, com o fato ou a razão do benefício
+   da dúvida que sustenta a decisão.
+4. Se ORDINÁRIA: informe Anexo, item, pontos da atividade (consulte a
+   tabela de pontos acima) e registre "DESCONTAR [N] pontos — art. 5º,
+   § 4º", com o motivo. Aplique isso individualmente às atividades
+   específicas que ficaram fora de um grupo por sinal claro de exclusão —
+   não desconte o grupo inteiro por causa de uma exceção pontual.
+
+TAREFA — PARTE 3: APURAÇÃO E CONCLUSÃO
+5. Tabela: Atividade/Grupo | Anexo/Item | Pontos originais | Diferenciada?
+   | Pontos mantidos | Pontos descontados | Motivo.
+6. Pontuação bruta − descontos = pontuação líquida.
+7. Critérios específicos distintos que ainda têm pelo menos uma atividade
+   diferenciada com pontos após os descontos.
+8. Compare com a tabela de níveis (art. 5º, caput): isso ainda atinge o
+   nível pretendido? Com que margem?
+9. Redija a fundamentação em duas partes, nesta ordem:
+   a) "FUNDAMENTAÇÃO DO MÉRITO (ART. 15)" — parágrafo citando só o que
+      ficou DIFERENCIADA, iniciando com "O memorial demonstra que o(a)
+      requerente...".
+   b) "ATIVIDADES NÃO ACEITAS PARA FINS DE DIFERENCIAÇÃO" — uma lista
+      cobrindo TODAS as atividades classificadas como ORDINÁRIA na Parte 2
+      (nenhuma pode ficar de fora desta lista), no formato: nome da
+      atividade — Anexo/item — pontos descontados — motivo específico da
+      não aceitação (não repita a mesma frase genérica para atividades
+      diferentes; cada uma tem seu motivo, mesmo que o motivo de fundo seja
+      parecido). Esta lista existe para que a Comissão veja exatamente o
+      que foi descontado e por quê, não só o que foi aceito.
+
+CONCLUSÃO FINAL: "O memorial, à luz da documentação apresentada, COMPROVA /
+NÃO COMPROVA o exigido pelo art. 15" — com pontuação líquida, critérios
+restantes, e margem em relação ao nível pretendido.
+
+REGRAS:
+- Não invente atividades, documentos ou fatos que não estejam nos anexados.
+- Não avalie o tipo formal do documento (art. 4º) — já foi conferido.
+- Proporcionalidade: o objetivo é separar o que tem lastro real do que não
+  tem — não maximizar descontos por tecnicismo.
+- Responda em português, direto ao ponto.
+
+---
+Arquivos anexados a esta conversa: memorial descritivo + documentos
+comprobatórios das atividades. Se algum ainda não foi anexado, peça antes
+de continuar.`;
+
+document.getElementById('promptArt15').value = PROMPT_ART15;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+document.getElementById('btnCopiarPromptArt15').addEventListener('click', async ()=>{
+  const feedback = document.getElementById('copiarPromptFeedback');
+  const showFeedback = ()=>{ feedback.style.display='inline'; setTimeout(()=>{ feedback.style.display='none'; }, 2000); };
+  try{
+    await navigator.clipboard.writeText(PROMPT_ART15);
+    showFeedback();
+  }catch(err){
+    const ta = document.getElementById('promptArt15');
+    ta.removeAttribute('readonly');
+    ta.focus();
+    ta.select();
+    try{
+      document.execCommand('copy');
+      showFeedback();
+    }catch(err2){
+      alert('Não foi possível copiar automaticamente. Selecione o texto na caixa e copie manualmente (Ctrl+C).');
+    }
+    ta.setAttribute('readonly','readonly');
+  }
+});
+
+/* ================= BASE LEGAL ================= */
+function renderLegal(){
+  document.getElementById('legalList').innerHTML = ARTIGOS.map(a=>
+    '<details style="border:1px solid var(--line); margin-bottom:8px; background:var(--paper);">'
+    +'<summary style="cursor:pointer; padding:12px 16px; font-weight:700; font-size:13.8px; color:var(--navy-800); list-style:revert;">'
+    +'<span style="font-family:\'IBM Plex Mono\',monospace; color:var(--gold); margin-right:8px;">'+a.n+'</span>'+a.t
+    +'</summary>'
+    +'<div style="padding:0 16px 16px; font-size:13.5px; color:var(--ink-soft); line-height:1.6;">'+a.d+'</div>'
+    +'</details>'
+  ).join('');
+}
+try{ renderLegal(); }catch(e){ console.error('Erro ao renderizar base legal:', e); }
+
+/* ================= BADGE / TOPO ================= */
+function renderBadge(){
+  const estagio = document.querySelector('input[name=fEstagio]:checked').value==='sim';
+  const teveRsc = document.querySelector('input[name=fTeveRsc]:checked').value==='sim';
+  const dataUltima = document.getElementById('fDataUltima').value;
+  let interSticioBloqueado = false;
+  if(teveRsc && dataUltima){
+    const limite = new Date(dataUltima); limite.setFullYear(limite.getFullYear()+3);
+    interSticioBloqueado = new Date() < limite;
+  }
+  const art14Bloqueio = art14Estado.some(a=>a.status==='no');
+
+  const pontos = totalPontos();
+  const criterios = distinctCriteria().size;
+  document.getElementById('badgePoints').textContent = pontos.toFixed(1).replace('.0','');
+  document.getElementById('badgeCriteria').textContent = criterios;
+
+  const nf = nivelFinal();
+  const badgeStatus = document.getElementById('badgeStatus');
+  const badgeLevel = document.getElementById('badgeLevel');
+
+  if(estagio || interSticioBloqueado || art14Bloqueio){
+    badgeLevel.textContent = '—';
+    badgeStatus.textContent = 'bloqueado';
+    badgeStatus.className = 'pill no';
+  } else if(nf){
+    badgeLevel.textContent = nf.key;
+    badgeStatus.textContent = 'deferível';
+    badgeStatus.className = 'pill ok';
+  } else {
+    badgeLevel.textContent = '—';
+    badgeStatus.textContent = 'insuficiente';
+    badgeStatus.className = 'pill warn';
+  }
+}
+
+/* ================= TAB 7 — PARECER (editável) ================= */
+function buildParecerData(){
+  const nome = document.getElementById('fNome').value || '[nome do servidor]';
+  const cargo = document.getElementById('fCargo').value || '[cargo]';
+  const pretendido = document.getElementById('fPretendido').value || '[não informado]';
+  const estagio = document.querySelector('input[name=fEstagio]:checked').value==='sim';
+  const teveRsc = document.querySelector('input[name=fTeveRsc]:checked').value==='sim';
+  const dataUltima = document.getElementById('fDataUltima').value;
+  let interSticioBloqueado = false, limiteTxt = '';
+  if(teveRsc && dataUltima){
+    const limite = new Date(dataUltima); limite.setFullYear(limite.getFullYear()+3);
+    interSticioBloqueado = new Date() < limite;
+    limiteTxt = limite.toLocaleDateString('pt-BR');
+  }
+  const art14Reprovados = ART14.map((t,i)=>({t,i})).filter(x=>art14Estado[x.i].status==='no');
+  const pontos = totalPontos();
+  const criterios = distinctCriteria().size;
+  const nf = nivelFinal();
+  const pn = nivelAlcancadoPorPontos();
+  const pendentes = atividades.filter(a=>a.status==='pendente').length;
+  const indeferidas = atividades.filter(a=>a.status==='indeferido').length;
+
+  let verdict, verdictClass, motivos = [];
+
+  if(estagio){
+    verdict='INDEFERIDO'; verdictClass='no';
+    motivos.push('Servidor em estágio probatório (art. 12, caput). O RSC não pode ser concedido nesta condição.');
+  } else if(interSticioBloqueado){
+    verdict='INDEFERIDO'; verdictClass='no';
+    motivos.push('Interstício de 3 anos da última concessão ainda não cumprido (art. 11). Prazo se completa em '+limiteTxt+'.');
+  } else if(art14Reprovados.length>0){
+    verdict='INDEFERIDO'; verdictClass='no';
+    art14Reprovados.forEach(x=>motivos.push('Critério objetivo do art. 14 não atendido: "'+x.t+'".'));
+  } else if(nf){
+    motivos.push('Pontuação apurada (apenas atividades deferidas): '+pontos.toFixed(1).replace('.0','')+' pontos, com '+criterios+' critérios específicos distintos.');
+    motivos.push('Nível máximo alcançado por pontuação: '+(pn?pn.key:'—')+'.');
+    if(nf.key!==(pn?pn.key:null)){
+      motivos.push('Nível ajustado para '+nf.key+' em razão da escolaridade comprovada, inferior à exigida para o nível apurado por pontuação — leitura interpretativa, sujeita à confirmação da CRSC-PCCTAE.');
+    }
+    if(pendentes>0){
+      motivos.push('Atenção: há '+pendentes+' atividade(s) ainda pendente(s) de decisão, não incluídas nesta apuração.');
+    }
+    const art15 = document.getElementById('fArt15').value.trim();
+    if(!art15){
+      verdict='PENDENTE — '+nf.key; verdictClass='no';
+      motivos.push('Requisitos numéricos atendidos, mas falta o registro da fundamentação exigida pelo art. 15 (demonstração de saberes e competências diferenciados).');
+    } else {
+      verdict='DEFERÍVEL — '+nf.key; verdictClass='ok';
+    }
+  } else {
+    verdict='INDEFERIDO'; verdictClass='no';
+    motivos.push('Pontuação ou quantidade de critérios específicos insuficiente para o menor nível (RSC-I: 10 pontos), considerando apenas as atividades deferidas. Pontuação apurada: '+pontos.toFixed(1).replace('.0','')+' pontos, '+criterios+' critérios distintos.');
+  }
+  if(indeferidas>0){
+    motivos.push(indeferidas+' atividade(s) indeferida(s) individualmente pela Comissão — ver motivos na tabela de lançamentos.');
+  }
+
+  const art15Texto = document.getElementById('fArt15').value.trim();
+  const dataHoje = new Date().toLocaleDateString('pt-BR');
+  const acao = verdictClass==='ok' ? 'DEFERE' : 'INDEFERE';
+  const totalAtiv = atividades.length;
+  const deferidasCount = atividades.filter(a=>a.status==='deferido').length;
+
+  const texto =
+`DECISÃO — PROCESSO DE RSC-PCCTAE
+Decreto nº 13.048, de 3 de julho de 2026
+
+Servidor: ${nome}
+Cargo: ${cargo}
+Nível pleiteado: ${pretendido}
+Data: ${dataHoje}
+
+I. DA ADMISSIBILIDADE
+- Estágio probatório: ${estagio ? 'SIM — impeditivo (art. 12)' : 'Não — sem impedimento'}
+- Interstício de 3 anos: ${teveRsc ? (interSticioBloqueado ? 'NÃO cumprido — libera em '+limiteTxt+' (art. 11)' : 'Cumprido') : 'Não se aplica (primeira concessão)'}
+- Atividades analisadas: ${totalAtiv} lançadas — ${deferidasCount} deferida(s), ${indeferidas} indeferida(s), ${pendentes} pendente(s).
+
+II. DA PONTUAÇÃO APURADA
+- Pontuação total (atividades deferidas): ${pontos.toFixed(1).replace('.0','')} pontos
+- Critérios específicos distintos: ${criterios}
+- Escolaridade comprovada: ${(function(){const el=document.getElementById('fEscolaridade');return el.options[el.selectedIndex].textContent;})()}
+- Nível alcançado por pontuação: ${pn ? pn.key : 'nenhum'}
+- Nível final, ajustado à credencial: ${nf ? nf.key : 'nenhum'}
+
+III. DOS CRITÉRIOS OBJETIVOS (ART. 14)
+${verdictClass==='ok'
+  ? 'Em atendimento ao disposto no art. 14 do Decreto nº 13.048/2026, a Comissão verificou o cumprimento dos seguintes critérios objetivos, não tendo sido identificada nenhuma causa de indeferimento:'
+  : '"'+ART14_CAPUT+'"'}
+${ART14.map((t,i)=>'- ['+({ok:'X — atende',no:'X — NÃO atende',nv:'não verificado'})[art14Estado[i].status]+'] '+['I','II','III','IV','V','VI','VII','VIII','IX','X'][i]+' - '+t).join('\n')}
+
+IV. DA FUNDAMENTAÇÃO DO MÉRITO (ART. 15)
+${art15Texto ? art15Texto : '[fundamentação ainda não registrada]'}
+
+V. DA FUNDAMENTAÇÃO DA DECISÃO
+${motivos.map(m=>'- '+m).join('\n')}
+
+VI. DA DECISÃO
+Diante do exposto, a Comissão para Reconhecimento de Saberes e Competências (CRSC-PCCTAE) ${acao} o pedido de Reconhecimento de Saberes e Competências, nível ${nf ? nf.key : (pretendido!=='[não informado]'?pretendido:'—')}, formulado por ${nome}.
+${verdictClass==='ok' ? 'A concessão só se efetiva por ato administrativo da autoridade máxima da IFE (art. 17), admitida delegação, vedada subdelegação. Esta decisão subsidia, mas não substitui, esse ato.' : ''}
+
+_________________________________
+Membro da CRSC-PCCTAE — assinatura`;
+
+  return {verdict, verdictClass, texto};
+}
+
+function renderParecerActivitySummary(){
+  const box = document.getElementById('parecerActivitySummary');
+  if(atividades.length===0){
+    box.innerHTML = '<p style="color:var(--ink-soft);font-size:13.5px;font-style:italic;">Nenhuma atividade lançada.</p>';
+    return;
+  }
+  const statusLabel = {pendente:'<span class="pill warn">pendente</span>', deferido:'<span class="pill ok">deferido</span>', indeferido:'<span class="pill no">indeferido</span>'};
+  box.innerHTML = '<table><thead><tr><th>Requisito</th><th>Critério</th><th>Documento</th><th>Tipo (art. 4º)</th><th>Qtd.</th><th>Pontos</th><th>Decisão</th></tr></thead><tbody>'
+    + atividades.map(a=>{
+        const qtdLabel = a.tipoDupla ? computeAnos(a.qtd)+' ano(s) — '+a.tipoDupla : (a.unidade.includes('ano')?computeAnos(a.qtd)+' ano(s)':a.qtd);
+        return '<tr>'
+          +'<td><span class="tagmini">Anexo '+a.anexo+'</span></td>'
+          +'<td>Item '+a.itemN+' — '+a.desc+'</td>'
+          +'<td>'+(a.documento||'—')+'</td>'
+          +'<td><span class="tagmini">'+(a.tipoDoc||'—')+'</span></td>'
+          +'<td class="num">'+qtdLabel+'</td>'
+          +'<td class="num">'+a.pontos.toFixed(1).replace('.0','')+'</td>'
+          +'<td>'+statusLabel[a.status]+(a.status==='indeferido'&&a.motivo?'<br><span style="font-size:11.5px;color:var(--ink-soft);">'+a.motivo+'</span>':'')+'</td>'
+          +'</tr>';
+      }).join('')
+    + '</tbody></table>';
+}
+
+function renderParecerStatusBadge(){
+  try{
+    const d = buildParecerData();
+    document.getElementById('parecerStatusBadge').innerHTML =
+      '<div class="parecer-verdict '+d.verdictClass+'">'+d.verdict+'</div>';
+  }catch(err){
+    document.getElementById('parecerStatusBadge').innerHTML =
+      '<div class="warning-box" style="border-color:var(--red);background:var(--red-bg);color:var(--red);">Erro ao calcular a situação: '+err.message+'</div>';
+  }
+}
+
+let parecerSalvo = null; /* null = sem edição salva, texto sempre automático */
+
+function textoAtualDoParecer(){
+  if(parecerSalvo !== null) return parecerSalvo;
+  try{ return buildParecerData().texto; }
+  catch(err){ return 'Não foi possível gerar o texto automaticamente. Detalhe do erro: ' + err.message; }
+}
+
+function renderParecer(){
+  renderParecerStatusBadge();
+  renderParecerActivitySummary();
+  document.getElementById('parecerDisplay').textContent = textoAtualDoParecer();
+  document.getElementById('parecerModoAviso').textContent = parecerSalvo !== null
+    ? 'Este texto foi editado manualmente e está salvo — ele não se atualiza mais sozinho. Clique em "Descartar edição e gerar de novo" para voltar ao texto automático.'
+    : 'O texto abaixo é gerado automaticamente e se atualiza sozinho conforme você preenche o processo. Clique em "Editar texto" para escrever por cima.';
+}
+
+function entrarModoEdicaoParecer(){
+  document.getElementById('parecerTextarea').value = textoAtualDoParecer();
+  document.getElementById('parecerDisplay').style.display = 'none';
+  document.getElementById('parecerTextarea').style.display = 'block';
+  document.getElementById('btnEditarParecer').style.display = 'none';
+  document.getElementById('btnSalvarParecer').style.display = 'inline-flex';
+  document.getElementById('btnCancelarParecer').style.display = 'inline-flex';
+}
+function sairModoEdicaoParecer(){
+  document.getElementById('parecerTextarea').style.display = 'none';
+  document.getElementById('parecerDisplay').style.display = 'block';
+  document.getElementById('btnEditarParecer').style.display = 'inline-flex';
+  document.getElementById('btnSalvarParecer').style.display = 'none';
+  document.getElementById('btnCancelarParecer').style.display = 'none';
+}
+
+document.getElementById('btnEditarParecer').addEventListener('click', entrarModoEdicaoParecer);
+
+document.getElementById('btnSalvarParecer').addEventListener('click', ()=>{
+  parecerSalvo = document.getElementById('parecerTextarea').value;
+  sairModoEdicaoParecer();
+  renderParecer();
+});
+
+document.getElementById('btnCancelarParecer').addEventListener('click', ()=>{
+  sairModoEdicaoParecer();
+  renderParecer();
+});
+
+document.getElementById('btnRegenerarParecer').addEventListener('click', ()=>{
+  if(parecerSalvo !== null && !confirm('Isso descarta o texto editado e salvo, substituindo pelo texto gerado automaticamente com os dados atuais. Continuar?')) return;
+  parecerSalvo = null;
+  sairModoEdicaoParecer();
+  renderParecer();
+});
+
+/* ================= INIT ================= */
+renderAtividades();
+renderBadge();
+</script>
+</body>
+</html>
